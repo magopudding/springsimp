@@ -1,1 +1,1 @@
-"簡化版Spring，可当做想深入学习spring的同学练习用" 
+"绨″寲鐗圫pring锛屽彲褰撳仛鎯虫繁鍏ュ涔爏pring鐨勫悓瀛﹀弬鑰冪敤" 
