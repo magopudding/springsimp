@@ -4,6 +4,7 @@ import com.kxy.annotation.KXYAutowire;
 import com.kxy.annotation.KXYController;
 import com.kxy.annotation.KXYRequestMapping;
 import com.kxy.annotation.KXYService;
+import com.kxy.controller.DemoController;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -79,24 +80,17 @@ public class KXYDispatherServlet extends HttpServlet {
 
 
     private void doDispath(HttpServletRequest req, HttpServletResponse resp) throws InvocationTargetException, IllegalAccessException {
-        String servletPath = req.getRequestURI().replaceAll("\\+","\\");
-        String projectName = req.getServletContext().getContextPath();
-        System.out.println("方法完成");
-        servletPath.replace(projectName+"\\","");
-        Method method = (Method) handleMapping.get("//qq/as");
+        String servletPath = req.getRequestURI().replaceAll("//+","/");
+        String projectName = req.getServletContext().getServletContextName();
+        servletPath.replace(projectName+"//","");
+        Method method = (Method) handleMapping.get("/qq/as");
         method.invoke(req,resp);
     }
 
     private void initHandlerMaping() {
-        ioc.forEach((k,v) -> {
+        ioc.forEach((String k, Object v) -> {
             Class <?> aClass = v.getClass();
-            try {
-                Object o = aClass.newInstance();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+
             if(aClass.isAnnotationPresent(KXYController.class)){
                 Method[] methods = aClass.getDeclaredMethods();
                 KXYRequestMapping mapping = aClass.getAnnotation(KXYRequestMapping.class);
@@ -105,14 +99,15 @@ public class KXYDispatherServlet extends HttpServlet {
                     urll = mapping.value() == null ? "":mapping.value();
                 }
                 for (Method method : methods) {
-                    
+
                     StringBuffer url = new StringBuffer();
                     if(urll.length() > 0){
                         url.append("/"+urll);
                     }
                     if(!method.isAnnotationPresent(KXYRequestMapping.class)){continue;}
                     url.append(method.getAnnotation(KXYRequestMapping.class).value());
-                    handleMapping.put(url.toString(), method);
+                    method.setAccessible(true);
+                    handleMapping.put(url.toString().replaceAll("//+","/"), method);
                     System.out.println("11111111" +url.toString()+","+method);
                 }
             }
