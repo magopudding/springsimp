@@ -84,7 +84,8 @@ public class KXYDispatherServlet extends HttpServlet {
         String projectName = req.getServletContext().getServletContextName();
         servletPath.replace(projectName+"//","");
         Method method = (Method) handleMapping.get("/qq/as");
-        method.invoke(req,resp);
+        String classNameSalis = toLowerFirstCase(method.getDeclaringClass().getSimpleName());
+        method.invoke(ioc.get(classNameSalis),req,resp);
     }
 
     private void initHandlerMaping() {
@@ -155,12 +156,12 @@ public class KXYDispatherServlet extends HttpServlet {
                 }
                 if (clazz.isAnnotationPresent(KXYController.class)) {
                     //默认别名
-                    String salis = toLowerFirstCase(clazz.getName());
+                    String salis = toLowerFirstCase(clazz.getSimpleName());
                     Object instance = clazz.newInstance();
                     ioc.put(salis, instance);
                 } else if (clazz.isAnnotationPresent(KXYService.class)) {
                     //默认别名
-                    String beanName = toLowerFirstCase(clazz.getName());
+                    String beanName = toLowerFirstCase(clazz.getSimpleName());
                     Object instance = clazz.newInstance();
 
                     //自定义命名
@@ -196,7 +197,7 @@ public class KXYDispatherServlet extends HttpServlet {
     private String toLowerFirstCase(String name) {
         char[] chars = name.toCharArray();
         chars[0] += 32;
-        return chars.toString();
+        return String.valueOf(chars);
     }
 
     private void doLoadConfig(String contextConfigLocation) {
